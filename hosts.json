@@ -2,16 +2,19 @@
     {
         "ID": "1",
         "Hostname": "Me",
+        "Group": "Group1",
         "HostIP": "127.0.0.1"
     },
     {
         "ID": "2",
         "Hostname": "Me2",
+        "Group": "Group1",
         "HostIP": "10.0.0.2"
     },
     {
         "ID": "3",
         "Hostname": "Me3",
+        "Group": "Group2",
         "HostIP": "10.0.0.1"
     }
 ]
