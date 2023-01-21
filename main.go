@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -38,6 +39,7 @@ func getPingData(IP string) (data ping.Statistics, e error) {
 
 type Host struct {
 	ID       string `json:"ID"`       // ID
+	Group    string `json:"group"`    // Group Name
 	Hostname string `json:"Hostname"` // HOSTNAME
 	HostIP   string `json:"HostIP"`   // HOST IP
 	IsAlive  bool   `json:"IsAlive"`  // say if there is connection to this host
@@ -45,13 +47,6 @@ type Host struct {
 }
 
 var Hosts []Host // Declare on list of the hosts
-
-func preDefinedHosts() {
-	Hosts = []Host{
-		{"1", "server 1", "192.168.1.11", false, ""},
-		{"2", "server 2", "192.168.1.12", false, ""},
-	}
-}
 
 func loadHostsJson(p string) (hosts []Host) {
 	content, err := ioutil.ReadFile(p)
@@ -98,18 +93,23 @@ func (h Host) getHostPingData() error {
 }
 
 // //////////////////////////////////////////////////////////////
-// ROUTES FUNCTIONS
+// ///////// ROUTES FUNCTIONS
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Welcome to the HomePage!")
-	fmt.Println("Endpoint Hit: homePage")
+	log.Printf("Endpoint Hit: homePage")
 }
 
+// ping Functions
+func returnAllHosts(w http.ResponseWriter, r *http.Request) {
+	log.Printf("EndpointHit: returnAllHosts")
+	json.NewEncoder(w).Encode(Hosts)
+}
 func returnAllHostsWithPing(w http.ResponseWriter, r *http.Request) {
 	log.Printf("EndpointHit: returnAllHostsWithPing")
 	for i := range Hosts {
 		pinger, err := ping.NewPinger(Hosts[i].HostIP)
 		pinger.SetPrivileged(true)
-		pinger.Timeout = time.Duration(time.Millisecond * 300)
+		pinger.Timeout = time.Duration(time.Millisecond * 125)
 		if err != nil {
 			panic(err)
 		}
@@ -134,11 +134,6 @@ func returnAllHostsWithPing(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Hosts)
 }
 
-func returnAllHosts(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("EndpointHit: returnAllHosts")
-	json.NewEncoder(w).Encode(Hosts)
-}
-
 func getHostWithPing(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["ID"]
@@ -157,7 +152,7 @@ func getHostWithPing(w http.ResponseWriter, r *http.Request) {
 	if hostFound.HostIP != "" {
 		pinger, err := ping.NewPinger(hostFound.HostIP)
 		pinger.SetPrivileged(true)
-		pinger.Timeout = time.Duration(time.Millisecond * 300)
+		pinger.Timeout = time.Duration(time.Millisecond * 125)
 		if err != nil {
 			panic(err)
 		}
@@ -185,6 +180,7 @@ func getHostWithPing(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Host List Edit Functions
 func getHost(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["ID"]
@@ -214,7 +210,7 @@ func createHost(w http.ResponseWriter, r *http.Request) {
 	var host Host
 	json.Unmarshal(reqBody, &host)
 	Hosts = append(Hosts, host)
-	fmt.Println("EndpointHit: added Host!")
+	log.Printf("EndpointHit: added Host!")
 	json.NewEncoder(w).Encode(host)
 }
 
@@ -227,7 +223,7 @@ func deleteHost(w http.ResponseWriter, r *http.Request) {
 			Hosts = append(Hosts[:i], Hosts[i+1:]...)
 		}
 	}
-	fmt.Println("EndpointHit: deleted Host!")
+	log.Printf("EndpointHit: deleted Host!")
 }
 
 func updateHost(w http.ResponseWriter, r *http.Request) {
@@ -239,42 +235,167 @@ func updateHost(w http.ResponseWriter, r *http.Request) {
 		if host.HostIP == hostToUpdate.HostIP {
 			Hosts[i].Hostname = hostToUpdate.Hostname
 			Hosts[i].IsAlive = hostToUpdate.IsAlive
+			Hosts[i].Group = hostToUpdate.Group
 		}
 		if host.Hostname == hostToUpdate.Hostname {
 			Hosts[i].HostIP = hostToUpdate.HostIP
 			Hosts[i].IsAlive = hostToUpdate.IsAlive
+			Hosts[i].Group = hostToUpdate.Group
 		}
 		if host.ID == hostToUpdate.ID {
 			Hosts[i].HostIP = hostToUpdate.HostIP
 			Hosts[i].Hostname = hostToUpdate.Hostname
 			Hosts[i].IsAlive = hostToUpdate.IsAlive
+			Hosts[i].Group = hostToUpdate.Group
+
 		}
 	}
 
-	fmt.Println("EndpointHit: Updated Host!")
+	log.Printf("EndpointHit: Updated Host!")
 	json.NewEncoder(w).Encode(Hosts)
 
 }
+
+// Utils functions
 func refresh(w http.ResponseWriter, r *http.Request) {
 	Hosts = loadHostsJson("hosts.json")
-	fmt.Println("EndpointHit: Refreshed app!")
+	log.Printf("EndpointHit: Refreshed app!")
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+// Groups Functions
+func getGroupsList() []string {
+	var Groups []string
+	for _, host := range Hosts {
+		inSlice := contains(Groups, host.Group)
+		if inSlice == false {
+			Groups = append(Groups, host.Group)
+		}
+	}
+	return Groups
+}
+
+func findGroupHosts(groupName string) []Host {
+	var GroupHosts []Host = []Host{}
+
+	for _, host := range Hosts {
+		if host.Group == groupName {
+
+			GroupHosts = append(GroupHosts, host)
+		}
+	}
+	return GroupHosts
+}
+
+func getGroups(w http.ResponseWriter, r *http.Request) {
+	GroupsList := getGroupsList()
+	log.Printf("EndpointHit: getGroups")
+	json.NewEncoder(w).Encode(GroupsList)
+}
+
+func getGroupHosts(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["GroupName"]
+
+	groupsHosts := findGroupHosts(key)
+	log.Printf("EndpointHit: getGroupHosts for group: " + key)
+	json.NewEncoder(w).Encode(groupsHosts)
+}
+
+func getGroupAvailable(w http.ResponseWriter, r *http.Request) {
+	log.Printf("EndpointHit: getGroupAvailable")
+	vars := mux.Vars(r)
+	key := vars["GroupName"]
+	groupHosts := findGroupHosts(key)
+
+	for i := range groupHosts {
+		pinger, err := ping.NewPinger(groupHosts[i].HostIP)
+		pinger.SetPrivileged(true)
+		pinger.Timeout = time.Duration(time.Millisecond * 125)
+		if err != nil {
+			panic(err)
+		}
+		pinger.Count = 3
+		err = pinger.Run()
+
+		if err != nil {
+			groupHosts[i].PingData = "Error: " + err.Error()
+			w.WriteHeader(500)
+		} else {
+
+			stats := pinger.Statistics()
+			groupHosts[i].PingData = fmt.Sprintf("Packets Sent: %d, Packets Received: %d, Packet Loss: %f%% , RTT Min/Avg/Max: %v/%v/%v",
+				stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss, stats.MinRtt, stats.AvgRtt, stats.MaxRtt)
+			if stats.PacketsRecv > 0 {
+				groupHosts[i].IsAlive = true
+			}
+
+		}
+	}
+	log.Printf("Got Ping data for group")
+	json.NewEncoder(w).Encode(groupHosts)
 }
 
 // Define routes
+var PORT string = "5000"
+
 func handleRequest() {
 	// use mux router to handle routes
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/", homePage)
-	r.HandleFunc("/host", createHost).Methods("POST")
+	//Util routes
 	r.HandleFunc("/refresh", refresh)
-	r.HandleFunc("/hosts", returnAllHosts)
-	r.HandleFunc("/hostsAvailable", returnAllHostsWithPing)
+
+	// Host routes
+	r.HandleFunc("/host", createHost).Methods("POST")
 	r.HandleFunc("/hostUpdate", updateHost).Methods("PUT")
 	r.HandleFunc("/host/{ID}", deleteHost).Methods("DELETE")
 	r.HandleFunc("/host/{ID}", getHost)
 	r.HandleFunc("/hostAvailable/{ID}", getHostWithPing)
-	log.Fatal(http.ListenAndServe(":5000", r))
+
+	// Hosts routes
+	r.HandleFunc("/hosts", returnAllHosts)
+	r.HandleFunc("/hostsAvailable", returnAllHostsWithPing)
+
+	// Groups Routes
+
+	r.HandleFunc("/getGroupHosts/{GroupName}", getGroupHosts)
+	r.HandleFunc("/getGroupAvailable/{GroupName}", getGroupAvailable)
+	r.HandleFunc("/getGroups", getGroups)
+
+	log.Fatal(http.ListenAndServe(":"+PORT, r))
+}
+
+// test functions
+
+// Function creates 100 demo servers for tests only
+func Get100Servers() []Host {
+	hostsOverload := []Host{}
+	for i := 1; i < 101; i++ {
+		numStr := strconv.Itoa(i)
+		name := "server-" + numStr
+		groupNum := strconv.Itoa(i / 10)
+		newHost := Host{
+			ID:       numStr,
+			Hostname: name,
+			HostIP:   "10.0.0." + numStr,
+			IsAlive:  false,
+			Group:    "Group" + groupNum,
+			PingData: "",
+		}
+		hostsOverload = append(hostsOverload, newHost)
+	}
+	return hostsOverload
 }
 
 // //////////////////////////////////////////////////////////////
@@ -282,8 +403,9 @@ func handleRequest() {
 func main() {
 
 	fmt.Println("Rest API v2.0 - Mux Routers")
-	fmt.Println("API CREATED BY AVIV MARK")
+	fmt.Println("API CREATED BY AVIV MARK RUNNING ON PORT:" + PORT)
 	fmt.Println("--------------------------------")
-	Hosts = loadHostsJson("hosts.json")
+	//Hosts = loadHostsJson("hosts.json")
+	Hosts = Get100Servers()
 	handleRequest()
 }
