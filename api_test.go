@@ -54,7 +54,7 @@ func TestHomePage(t *testing.T) {
 }
 
 func TestCreateHost(t *testing.T) {
-	host := Host{ID: "3", Hostname: "server 3", HostIP: "192.168.1.13", IsAlive: false}
+	host := Host{ID: "3", Hostname: "server 3", HostIP: "192.168.1.13", IsAlive: false, Group: "test1"}
 	hostJson, _ := json.Marshal(host)
 
 	req, err := http.NewRequest("POST", "/host", bytes.NewBuffer(hostJson))
@@ -80,7 +80,7 @@ func TestCreateHost(t *testing.T) {
 			returnedHost, host)
 	}
 
-	if len(Hosts) != 3 {
+	if len(Hosts) != 1 {
 		t.Errorf("Hosts slice not updated with new host: got %v want %v",
 			len(Hosts), 3)
 	}
