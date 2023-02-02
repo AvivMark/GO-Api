@@ -11,7 +11,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +26,15 @@ jobs:
 
     - name: Test
       run: go test -v ./...
-    
+    - name: build docker image
+    - name: Docker Action
+      uses: zenato/docker-action@v1.0.0
+      with:
+         username: ${{ secrets.DOCKERHUB_USERNAME }}
+         password: ${{ secrets.DOCKERHUB_PASSWORD }}
+         repository: aviv27400
+         registry: mark-dockers
+         tag: 1.0.0
     - name: Upload Artifact
       uses: actions/upload-artifact@v3.1.2
       with: 
