@@ -32,8 +32,8 @@ jobs:
       with:
          username: ${{ secrets.DOCKERHUB_USERNAME }}
          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-         repository: hub.docker.com
-         registry: mark-dockers
+         repository: aviv27400
+         registry: hub.docker.com
          tag: 1.0.0
          
     - name: Upload Artifact
