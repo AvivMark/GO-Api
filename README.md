@@ -1,9 +1,7 @@
 # GO-PINGER-API
+Api built in go, serving hosts(ip) exist in json file
 
-## Api built in go, serving hosts(ip) exist in json file
-
-
-### API Running Port
+## API Running Port
 PORT=5000
 
 ### API hosts file - production
