@@ -1,13 +1,15 @@
 # GO-PINGER-API
 Api built in go, serving hosts(ip) exist in json file
 
-## API Running Port
+## Configuration
+
+### API Running Port
 PORT=5000
 
 ### API hosts file - production
 HOSTSFILE=hosts.json
 
-### API Routes
+## API Routes
 
 * /refresh - loading the hosts again from json file
 
