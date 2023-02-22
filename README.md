@@ -1,5 +1,5 @@
-# GO-PINGER-API
-Api built in go, serving hosts(ip) exist in json file
+# PINGER-API
+Api built in go, use this api to create a self monitoring api 
 
 ## Configuration
 
@@ -7,6 +7,7 @@ Api built in go, serving hosts(ip) exist in json file
 PORT=5000
 
 ### API hosts file - production
+this file exists in the main project folder, the file contains the hosts required to monitor with
 HOSTSFILE=hosts.json
 
 ## API Routes
