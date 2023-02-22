@@ -7,7 +7,7 @@ Api built in go, use this api to create a self monitoring api
 PORT=5000
 
 ### API hosts file - production
-HOSTSFILE=hosts.json
+HOSTSFILE=hosts.json <br />
 this file exists in the main project folder, the file contains the hosts required to monitor with
 
 ## API Routes
