@@ -1,4 +1,4 @@
-module goApi
+module pingerApi
 
 go 1.19
 
