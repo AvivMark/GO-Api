@@ -81,7 +81,7 @@ func handleRequest() {
 	r.HandleFunc("/getGroups", getGroups)
 
 	//Other Routes
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
 
 	handler := cors.Default().Handler(r)
 	log.Fatal(http.ListenAndServe(":"+PORT, handler))
