@@ -5,29 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
 )
-
-// Function creates 100 demo servers for tests only
-func Get100Servers() []Host {
-	hostsOverload := []Host{}
-	for i := 1; i < 101; i++ {
-		numStr := strconv.Itoa(i)
-		name := "server-" + numStr
-		groupNum := strconv.Itoa(i / 10)
-		newHost := Host{
-			ID:       numStr,
-			Hostname: name,
-			HostIP:   "10.0.0." + numStr,
-			IsAlive:  false,
-			Group:    "Group" + groupNum,
-			PingData: "",
-		}
-		hostsOverload = append(hostsOverload, newHost)
-	}
-	return hostsOverload
-}
 
 // Routes tests
 func TestHomePage(t *testing.T) {
