@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 var PORT string = "5000"        // APP PORT
@@ -14,10 +17,29 @@ var JsonFilePath = "hosts.json" // JSON file path
 // ///////// Basic ROUTES FUNCTIONS
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Welcome to the HomePage!")
-	log.Printf("Endpoint Hit: homePage")
 }
 
-/////////// Utils functions
+// ///////// Utils functions
+
+// Function creates 100 demo servers for tests only
+func Get100Servers() []Host {
+	hostsOverload := []Host{}
+	for i := 1; i < 101; i++ {
+		numStr := strconv.Itoa(i)
+		name := "server-" + numStr
+		groupNum := strconv.Itoa(i / 10)
+		newHost := Host{
+			ID:       numStr,
+			Hostname: name,
+			HostIP:   "10.0.0." + numStr,
+			IsAlive:  false,
+			Group:    "Group" + groupNum,
+			PingData: "",
+		}
+		hostsOverload = append(hostsOverload, newHost)
+	}
+	return hostsOverload
+}
 
 // ROUTE TO  RELOAD HOSTS FROM JSON FILE
 func refresh(w http.ResponseWriter, r *http.Request) {
@@ -59,9 +81,10 @@ func handleRequest() {
 	r.HandleFunc("/getGroups", getGroups)
 
 	//Other Routes
-	r.HandleFunc("/", homePage)
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 
-	log.Fatal(http.ListenAndServe(":"+PORT, r))
+	handler := cors.Default().Handler(r)
+	log.Fatal(http.ListenAndServe(":"+PORT, handler))
 }
 
 // //////////////////////////////////////////////////////////////
@@ -72,6 +95,13 @@ func main() {
 	fmt.Println("Rest API v2.0 - Mux Routers")
 	fmt.Println("API CREATED BY AVIV MARK RUNNING ON PORT:" + PORT)
 	fmt.Println("----------------------------------------------")
-	Hosts = getHostsFromJson(JsonFilePath)
+	if len(os.Args) > 1 {
+
+		if os.Args[1] == "Test" {
+			Hosts = Get100Servers()
+		}
+	} else {
+		Hosts = getHostsFromJson(JsonFilePath)
+	}
 	handleRequest()
 }
