@@ -12,5 +12,5 @@ FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /go/src/app ./
 COPY --from=builder /go/src/hosts.json ./
-COPY --from=builder /go/src/public ./public
+COPY --from=builder /go/src/public ./public/
 CMD ["./app"]
