@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 var PORT string = "5000"        // APP PORT
@@ -35,6 +36,11 @@ func contains(s []string, str string) bool {
 	return false
 }
 
+// enable cors function
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 // Routes main Declaration function
 func handleRequest() {
 	r := mux.NewRouter()
@@ -60,8 +66,8 @@ func handleRequest() {
 
 	//Other Routes
 	r.HandleFunc("/", homePage)
-
-	log.Fatal(http.ListenAndServe(":"+PORT, r))
+	handler := cors.Default().Handler(r)
+	log.Fatal(http.ListenAndServe(":"+PORT, handler))
 }
 
 // //////////////////////////////////////////////////////////////
