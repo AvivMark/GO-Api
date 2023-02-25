@@ -12,10 +12,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+    
+    - name: Read VERSION file
+      id: getversion
+      run: echo "::set-output name=version::$(cat VERSION)"
+      
     - name: Create Git Tag
       run: |
         git config user.email "your_email@example.com"
         git config user.name "Your Name"
-        git tag -a v1.0.0 -m "Release version 1.0.0"
-        git push origin v1.0.0
+        git tag -a v${{ steps.getversion.outputs.version }} -m "Release version ${{ steps.getversion.outputs.version }}"
+        git push origin v${{ steps.getversion.outputs.version }}
