@@ -9,6 +9,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+
+	"github.com/AvivMark/Pinger-Api/api"
 )
 
 var PORT string = "5000"        // APP PORT
