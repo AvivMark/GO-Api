@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 )
 
 var PORT string = "5000"        // APP PORT
 var JsonFilePath = "hosts.json" // JSON file path
+var DebugMode = false
 
-// ///////// Basic ROUTES FUNCTIONS
+// ///////// UI ROUTES FUNCTIONS
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome to the HomePage!")
 }
 
 // ///////// Utils functions
@@ -24,14 +24,14 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 // Function creates 100 demo servers for tests only
 func Get100Servers() []Host {
 	hostsOverload := []Host{}
-	for i := 1; i < 101; i++ {
+	for i := 1; i < 121; i++ {
 		numStr := strconv.Itoa(i)
 		name := "server-" + numStr
-		groupNum := strconv.Itoa(i / 10)
+		groupNum := strconv.Itoa(i / 12)
 		newHost := Host{
 			ID:       numStr,
 			Hostname: name,
-			HostIP:   "10.0.0." + numStr,
+			HostIP:   "172.17.17." + numStr,
 			IsAlive:  false,
 			Group:    "Group" + groupNum,
 			PingData: "",
@@ -80,11 +80,11 @@ func handleRequest() {
 	r.HandleFunc("/getGroupAvailable/{GroupName}", getGroupAvailable)
 	r.HandleFunc("/getGroups", getGroups)
 
-	//Other Routes
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./public/")))
+	//UI Routes
+	// Set up a route for the reverse proxy.
+	r.HandleFunc("/", homePage)
 
-	handler := cors.Default().Handler(r)
-	log.Fatal(http.ListenAndServe(":"+PORT, handler))
+	log.Fatal(http.ListenAndServe(":"+PORT, r))
 }
 
 // //////////////////////////////////////////////////////////////
@@ -92,16 +92,23 @@ func handleRequest() {
 // MAIN FUNCTION
 func main() {
 
-	fmt.Println("Rest API v2.0 - Mux Routers")
-	fmt.Println("API CREATED BY AVIV MARK RUNNING ON PORT:" + PORT)
-	fmt.Println("----------------------------------------------")
+	// Create Test Mode in run
 	if len(os.Args) > 1 {
-
-		if os.Args[1] == "Test" {
+		debugArg := strings.ToLower(os.Args[1])
+		if debugArg == "test" {
 			Hosts = Get100Servers()
+			DebugMode = true
 		}
 	} else {
 		Hosts = getHostsFromJson(JsonFilePath)
 	}
+
+	if DebugMode {
+		fmt.Println("--------------Debug MODE----------------------")
+	}
+	fmt.Println("PingGo - The watchdog for your servers")
+	fmt.Println("API CREATED BY AVIV MARK RUNNING ON PORT:" + PORT)
+	fmt.Println("----------------------------------------------")
+
 	handleRequest()
 }

@@ -1,0 +1,66 @@
+[
+    {
+        "groupName": "Group1",
+        "groupDescription": "Group1 Description",
+        "groupHosts": [
+            {
+                "ID": "1",
+                "Hostname": "Me",
+                "HostIP": "127.0.0.1"
+            },
+            {
+                "ID": "2",
+                "Hostname": "Me2",
+                "HostIP": "10.0.0.2"
+            },
+            {
+                "ID": "3",
+                "Hostname": "Me3",
+                "HostIP": "10.0.0.1"
+            }
+        ]
+    },
+    {
+        "groupName": "Group2",
+        "groupDescription": "Group2 Description",
+        "groupHosts": [
+            {
+                "ID": "1",
+                "Hostname": "Me",
+                "HostIP": "127.0.0.1"
+            },
+            {
+                "ID": "2",
+                "Hostname": "Me2",
+                "HostIP": "10.0.0.2"
+            },
+            {
+                "ID": "3",
+                "Hostname": "Me3",
+                "HostIP": "10.0.0.1"
+            }
+        ]
+    },
+    {
+        "groupName": "Group3",
+        "groupDescription": "Group3 Description",
+        "groupHosts": [
+            {
+                "ID": "1",
+                "Hostname": "Me",
+                "HostIP": "127.0.0.1"
+            },
+            {
+                "ID": "2",
+                "Hostname": "Me2",
+                "HostIP": "10.0.0.2"
+            },
+            {
+                "ID": "3",
+                "Hostname": "Me3",
+                "HostIP": "10.0.0.1"
+            }
+        ]
+    }
+    
+]
